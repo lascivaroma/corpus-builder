@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Corpora
+data/
+*.xsl
+.idea/*
+
 # Distribution / packaging
 .Python
 env/

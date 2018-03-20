@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Latin Corpus Build</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}">
+        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.hs')}}"></script>
+    </head>
+    <body>
+
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark justify-content-between">
+        <a class="navbar-brand" href="{{ url_for('main') }}"></a>
+      </nav>
+      <div class="container">
+        {% block body %}{% endblock %}
+      </div>
+
+      <script type="text/javascript">{% block js %}{% endblock %}</script>
+    </body>
+</html>
