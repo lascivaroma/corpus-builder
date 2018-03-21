@@ -1,3 +1,10 @@
+# Project specific
+data/
+.idea/*
+cache/
+*.pickle
+output/*.xml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -5,11 +12,6 @@ __pycache__/
 
 # C extensions
 *.so
-
-# Corpora
-data/
-*.xsl
-.idea/*
 
 # Distribution / packaging
 .Python
