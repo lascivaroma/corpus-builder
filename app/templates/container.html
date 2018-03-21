@@ -6,11 +6,20 @@
         <link rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.css')}}" />
         <link rel="stylesheet" href="{{ url_for('.static', filename='css/typeahead.css')}}" />
         <script type="text/javascript" src="{{ url_for('.static', filename='js/jquery.js')}}"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#clear-local-storage").on("click", function(e) {
+                    e.preventDefault();
+                    localStorage.clear();
+                })
+            })
+        </script>
     </head>
     <body>
 
       <nav class="navbar navbar-expand-md navbar-dark bg-dark justify-content-between" style="margin-bottom: 50px;">
         <a class="navbar-brand" href="{{ url_for('.index') }}">Corpus Builder</a>
+        <a class="btn btn-danger" id="clear-local-storage">Clear browser cache</a>
       </nav>
       <div class="container">
         {% block body %}{% endblock %}

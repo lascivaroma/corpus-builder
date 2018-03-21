@@ -92,7 +92,7 @@ def authors():
             "author": collection.parent.parent.get_label()
         }
         for collection in current_app.resolver.getMetadata().readableDescendants
-        if collection
+        if collection and collection.lang == "lat"
     ])
 
 
