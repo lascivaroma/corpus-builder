@@ -40,4 +40,4 @@ def create_app(resolver=default_resolver, save_folder="output", cache=make_path(
     )
 
     app.register_blueprint(main_blueprint)
-    return app, cache
+    return app, app.resolver.cache
