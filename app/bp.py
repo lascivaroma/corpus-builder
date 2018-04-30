@@ -56,7 +56,10 @@ def lemmatize():
     words = ""
     texts = list(SPACE_SPLIT.findall(_in))
     for index, lemmatisation in enumerate(current_app.lemmatizer.lemmatise_multiple(_in)):
-        possible_lemma = set([proposal["lemma"] for proposal in lemmatisation])
+        possible_lemma = [
+            proposal["lemma"]+"("+proposal["morph"]+")"
+            for proposal in lemmatisation
+        ]
         words += """\n        <w lemma="{lemma}">{form}</w>{after}""".format(
             form=texts[index][1],
             lemma="|".join(possible_lemma),
@@ -116,3 +119,9 @@ def passage():
     xml = xsl(xml)
 
     return jsonify({"text": str(xml)})
+
+
+@main_blueprint.errorhandler(ReferenceError)
+def handle_invalid_usage(error):
+    return Response("Unknown reference", status=404, 
+        headers={"Content-type": "text/plain"})
