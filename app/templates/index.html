@@ -23,6 +23,7 @@
         $('#text-typeahead').typeahead(null, {
           name: 'text-id',
           source: author_autocomplete,
+          limit: 15,
           display: function(datum) { return datum.title + " - " + datum.author; }
         }).bind('typeahead:select', function(ev, suggestion) {
           $("#text-id").val(suggestion.id);

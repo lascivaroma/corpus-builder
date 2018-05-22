@@ -32,6 +32,25 @@ def index():
     return render_template("index.html")
 
 
+@main_blueprint.route("/output")
+def current_output():
+    """ Render current output
+    """
+    done = ["<div>"]
+    files = glob.glob(os.path.join(current_app.save_folder, "*.xml"))
+
+    for file_id in range(len(files)):
+        with open(os.path.join(current_app.save_folder, "{}.xml".format(file_id))) as f:
+            done.append(f.read())
+
+    return Response(
+        "\n".join(
+            done + ["</div>"]
+        ),
+        headers={"Content-type": "application/xml"}
+    )
+
+
 @main_blueprint.route("/api/save", methods=["GET", "POST"])
 def save():
     xml = request.form.get("xml")
@@ -111,7 +130,7 @@ def passage():
         textId=objectId,
         subreference=passageId
     )
-    xml = passage.export(Mimetypes.PYTHON.ETREE)
+    xml = passage.export(Mimetypes.PYTHON.ETREE)#
 
     with open(make_path("plaintext.xsl")) as f:
         xsl = etree.XSLT(etree.parse(f))
