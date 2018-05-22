@@ -3,13 +3,17 @@ from flask import Blueprint, \
                   current_app, \
                   jsonify, \
                   request, \
-                  Response
+                  Response, \
+                  send_file
 from MyCapytain.common.constants import Mimetypes
 from lxml import etree
 from .utils import make_path
 import glob
 import os
 import re
+import zipfile
+import time
+from io import BytesIO
 
 
 SPACE_SPLIT = re.compile("((\w+)(\W*))")
@@ -49,6 +53,24 @@ def current_output():
         ),
         headers={"Content-type": "application/xml"}
     )
+
+
+@main_blueprint.route("/download")
+def download():
+    """ Render current output
+    """
+    memory_file = BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        files = glob.glob(os.path.join(current_app.save_folder, "*.xml"))
+        for individualFile in files:
+            filename = os.path.basename(individualFile)
+            data = zipfile.ZipInfo(filename)
+            data.date_time = time.localtime(time.time())[:6]
+            data.compress_type = zipfile.ZIP_DEFLATED
+            with open(individualFile) as f:
+                zf.writestr(data, f.read())
+    memory_file.seek(0)
+    return send_file(memory_file, attachment_filename='corpus.zip', as_attachment=True)
 
 
 @main_blueprint.route("/api/save", methods=["GET", "POST"])
