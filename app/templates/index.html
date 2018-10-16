@@ -81,8 +81,14 @@
             var v = $('#xml').val();
             var textBefore = v.substring(0,  cursorPos);
             var textAfter  = v.substring(cursorPos, v.length);
+            var addition = " ana=\"#"+ $("#category").val();
+            if (document.getElementById("composite").checked) {
+                addition += " #composite";
+            }
 
-            $('#xml').val(textBefore + " ana=\"#"+ $("#category").val() +"\" "+ textAfter);
+            addition += "\" ";
+
+            $('#xml').val(textBefore + addition + textAfter);
         });
 
         /********************************************************************
@@ -109,20 +115,24 @@
       <div class="form-group row">
         <label for="pb" class="col-sm-3 col-form-label">Page</label>
         <div class="col-sm-9">
-          <input type="number" class="form-control" id="pb" placeholder="Page Beginning" name="pb">
+          <input type="number" class="form-control" id="pb" placeholder="Page Beginning" name="pb"/>
         </div>
       </div>
       <div class="form-group row">
         <label for="category" class="col-sm-3 col-form-label">Category</label>
         <div class="col-sm-3">
-          <input type="text" class="form-control" id="category" placeholder="Category" name="category">
+          <textarea class="form-control" id="category" placeholder="Category" name="category" rows="2"></textarea>
+          <label><input type="checkbox" id="composite" name="composite" /> Composite</label>
         </div>
         <label for="tradi-category" class="col-sm-3 col-form-label">Base Category</label>
         <div class="col-sm-3">
-          <select multiple class="form-control" id="tradi-category" name="tradicategory">
+          <select multiple class="form-control" id="tradi-category" name="tradicategory" style="height: 9em;">
               <option value="#female">Female</option>
+              <option value="#cunnus">Cunnus</option>
+              <option value="#metaphore">Métaphore</option>
               <option value="#male">Male</option>
-              <option value="acte">Acte</option>
+              <option value="#acte">Acte</option>
+              <option value="#loan-word">Emprunt</option>
               <option value="#fellatio #acte">Fellation</option>
               <option value="#passive">Passif</option>
               <option value="#homoeros">Homoérotisme</option>
@@ -132,22 +142,22 @@
       <div class="form-group row">
         <label for="text-typeahead" class="col-sm-3 col-form-label">Text Identifier</label>
         <div class="col-sm-9">
-          <input type="text" class="form-control" id="text-typeahead" placeholder="Text identifier" name="text-typeahead">
+          <input type="text" class="form-control" id="text-typeahead" placeholder="Text identifier" name="text-typeahead"/>
             <div>
-              <input type="text" class="form-control" id="text-id" disabled name="text-id">
+              <input type="text" class="form-control" id="text-id" disabled name="text-id"/>
             </div>
         </div>
       </div>
       <div class="form-group row">
         <label for="passage-id" class="col-sm-3 col-form-label">Passage Identifier</label>
         <div class="col-sm-9">
-          <input type="text" class="form-control" id="passage-id" placeholder="Passage identifier" name="passage-id">
+          <input type="text" class="form-control" id="passage-id" placeholder="Passage identifier" name="passage-id"/>
         </div>
       </div>
       <div class="form-group row">
         <label for="source-id" class="col-sm-3 col-form-label">Source Identifier</label>
         <div class="col-sm-9">
-          <input type="text" class="form-control" id="source-id" placeholder="Source identifier" name="source-id">
+          <input type="text" class="form-control" id="source-id" placeholder="Source identifier" name="source-id"/>
         </div>
       </div>
       <div class="form-group row">
