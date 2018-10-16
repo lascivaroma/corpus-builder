@@ -72,6 +72,19 @@
             });
         });
 
+        /********************************************************
+         *  Insert Analysis
+         */
+        $('#insert').on('click', function(e) {
+            e.preventDefault();
+            var cursorPos = $('#xml').prop('selectionStart');
+            var v = $('#xml').val();
+            var textBefore = v.substring(0,  cursorPos);
+            var textAfter  = v.substring(cursorPos, v.length);
+
+            $('#xml').val(textBefore + " ana=\"#"+ $("#category").val() +"\" "+ textAfter);
+        });
+
         /********************************************************************
          *  Save
          */
@@ -84,6 +97,7 @@
                 data: $("#main-form").serialize()
             }).done(function(data) {
                 alert("Saved at " + data.path);
+                $("#xml").val("");
             });
         });
     });
@@ -93,63 +107,73 @@
 {% block body %}
     <form class="form" method="POST" action="{{ url_for(".save") }}" id="main-form">
       <div class="form-group row">
-        <label for="pb" class="col-sm-4 col-form-label">Page Beginning (Leave empty if not needed)</label>
-        <div class="col-sm-8">
+        <label for="pb" class="col-sm-3 col-form-label">Page</label>
+        <div class="col-sm-9">
           <input type="number" class="form-control" id="pb" placeholder="Page Beginning" name="pb">
         </div>
       </div>
       <div class="form-group row">
-        <label for="category" class="col-sm-4 col-form-label">Category</label>
-        <div class="col-sm-8">
+        <label for="category" class="col-sm-3 col-form-label">Category</label>
+        <div class="col-sm-3">
           <input type="text" class="form-control" id="category" placeholder="Category" name="category">
         </div>
+        <label for="tradi-category" class="col-sm-3 col-form-label">Base Category</label>
+        <div class="col-sm-3">
+          <select multiple class="form-control" id="tradi-category" name="tradicategory">
+              <option value="#female">Female</option>
+              <option value="#male">Male</option>
+              <option value="acte">Acte</option>
+              <option value="#fellatio #acte">Fellation</option>
+              <option value="#passive">Passif</option>
+              <option value="#homoeros">Homoérotisme</option>
+          </select>
+        </div>
       </div>
       <div class="form-group row">
-        <label for="text-typeahead" class="col-sm-4 col-form-label">Text Identifier</label>
-        <div class="col-sm-8">
+        <label for="text-typeahead" class="col-sm-3 col-form-label">Text Identifier</label>
+        <div class="col-sm-9">
           <input type="text" class="form-control" id="text-typeahead" placeholder="Text identifier" name="text-typeahead">
+            <div>
+              <input type="text" class="form-control" id="text-id" disabled name="text-id">
+            </div>
         </div>
       </div>
       <div class="form-group row">
-        <div class="col-sm-8 offset-sm-4">
-          <input type="text" class="form-control" id="text-id" disabled name="text-id">
-        </div>
-      </div>
-      <div class="form-group row">
-        <label for="passage-id" class="col-sm-4 col-form-label">Passage Identifier</label>
-        <div class="col-sm-8">
+        <label for="passage-id" class="col-sm-3 col-form-label">Passage Identifier</label>
+        <div class="col-sm-9">
           <input type="text" class="form-control" id="passage-id" placeholder="Passage identifier" name="passage-id">
         </div>
       </div>
       <div class="form-group row">
-        <label for="source-id" class="col-sm-4 col-form-label">Source Identifier</label>
-        <div class="col-sm-8">
+        <label for="source-id" class="col-sm-3 col-form-label">Source Identifier</label>
+        <div class="col-sm-9">
           <input type="text" class="form-control" id="source-id" placeholder="Source identifier" name="source-id">
         </div>
       </div>
       <div class="form-group row">
         <div class="col-sm-12 text-right">
-            <button class="btn btn-outline-success" id="build-id">Build Identifier</button>
-            <button class="btn btn-success" id="retrieve-id">Retrieve</button>
+            <button class="btn btn-outline-success btn-small" id="build-id">Build Identifier</button>
+            <button class="btn btn-success btn-small" id="retrieve-id">Retrieve</button>
         </div>
       </div>
       <div class="form-group row">
-        <label for="plain-text" class="col-sm-4 col-form-label">Plain Text</label>
-        <div class="col-sm-8">
+        <label for="plain-text" class="col-sm-3 col-form-label">Plain Text</label>
+        <div class="col-sm-9">
           <textarea class="form-control" id="plain-text"
-                    placeholder="Text identifier" name="plain-text" rows="5"></textarea>
+                    name="plain-text" rows="5"></textarea>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-sm-12 text-right">
-            <button class="btn btn-success" id="transform">Transform</button>
+            <button class="btn btn-success btn-small" id="transform">Transform</button>
+             <button class="btn btn-info btn-small" id="insert">Select analysis</button>
         </div>
       </div>
       <div class="form-group row">
-        <label for="xml" class="col-sm-4 col-form-label">XML</label>
-        <div class="col-sm-8">
-          <textarea class="form-control" id="xml"
-                    placeholder="Text identifier" name="xml" rows="2"></textarea>
+        <label for="xml" class="col-sm-3 col-form-label">XML</label>
+        <div class="col-sm-9">
+          <textarea class="form-control" id="xml" style="font-size: x-small;"
+                    name="xml" rows="2"></textarea>
         </div>
       </div>
       <div class="form-group row">

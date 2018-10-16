@@ -107,7 +107,7 @@ def lemmatize():
             after=texts[index][2]
         )
 
-    template = """<div type="fragment" corresp="adams:{page}" ana="#{category}">
+    template = """<div type="fragment" corresp="adams:{page}" ana="#{category} {addition_cats}">
     <quote xml:lang="lat" source="{source}">{words}    
     </quote>
  </div>
@@ -115,6 +115,7 @@ def lemmatize():
         page=request.form.get("pb", "page"),
         category=request.form.get("category", "category"),
         source=request.form.get("source-id"),
+        addition_cats=" ".join(request.form.getlist("tradicategory")),
         words=words
     )
     return Response(
