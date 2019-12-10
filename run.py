@@ -5,7 +5,7 @@ import lxml.etree as etree
 import MyCapytain.common.constants as c
 
 
-class color:
+class COLOR:
    PURPLE = '\033[95m'
    CYAN = '\033[96m'
    DARKCYAN = '\033[36m'
@@ -50,7 +50,8 @@ def run(debug=False, data="data", cache="cache", save_folder="output"):
 @click.option("--data", default="data/*/*", help="Path to the corpora containing directory")
 @click.option("--data", default="data/*/*", help="Path to the corpora containing directory")
 @click.option("--xsl", default="app/plaintext.xsl", help="XSL")
-def search(text_id, w1=None, w2=None, data="data/*/*", depth=1, xsl=None):
+@click.option("--color", default=False, is_flag=True, help="XSL")
+def search(text_id, w1=None, w2=None, data="data/*/*", depth=1, xsl=None, color=False):
     """ """
     app, cache = create_app(resolver=data, cache="cache")
     resolver = app.resolver
@@ -71,7 +72,11 @@ def search(text_id, w1=None, w2=None, data="data/*/*", depth=1, xsl=None):
     r2 = " ((?P<w1>"+w2+")\s+(?P<wm>(\w+\s+){1,2})?(?P<w2>"+w1+"))"
     s = re.compile(r"\s+")
     normalizer = lambda x: s.sub(" ", x)
-    repl = color.RED + " \\g<w1>" + color.END + " \\g<wm>" + color.RED + "\\g<w2>" + color.END
+
+    repl = " \\g<w1> \\g<wm>\\g<w2>"
+    if color:
+        repl = COLOR.RED + " \\g<w1>" + COLOR.END + " \\g<wm>" + COLOR.RED + "\\g<w2>" + COLOR.END
+
     sub = lambda s, reg: re.sub(reg, repl, normalizer(s), re.MULTILINE)
     cnt = 0
     for ref, plain_text in texts:
@@ -83,6 +88,11 @@ def search(text_id, w1=None, w2=None, data="data/*/*", depth=1, xsl=None):
 
     print("{} results".format(cnt))
 
+
+@cli.command("get-tags")
+def get_tags():
+    from app.utils import get_tags
+    print(get_tags(clear_cache=True))
 
 cli.add_command(run)
 cli.add_command(clear)

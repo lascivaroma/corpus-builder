@@ -81,7 +81,7 @@
             var v = $('#xml').val();
             var textBefore = v.substring(0,  cursorPos);
             var textAfter  = v.substring(cursorPos, v.length);
-            var addition = " ana=\"#"+ $("#category").val();
+            var addition = " ana=\"#"+ $("#category").val() + " " + $("#sourced-tags").val().join(" ");
             if (document.getElementById("composite").checked) {
                 addition += " #composite";
             }
@@ -121,6 +121,11 @@
       <div class="form-group row">
         <label for="category" class="col-sm-3 col-form-label">Category</label>
         <div class="col-sm-3">
+          <select multiple class="form-control" id="sourced-tags" name="sourced-tags" style="height: 9em;">
+              {% for tag in tags %}
+                  <option value="#{{ tag }}">{{ tag }}</option>
+              {% endfor %}
+          </select>
           <textarea class="form-control" id="category" placeholder="Category" name="category" rows="2"></textarea>
           <label><input type="checkbox" id="composite" name="composite" /> Composite</label>
         </div>

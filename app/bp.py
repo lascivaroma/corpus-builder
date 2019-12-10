@@ -7,7 +7,7 @@ from flask import Blueprint, \
                   send_file
 from MyCapytain.common.constants import Mimetypes
 from lxml import etree
-from .utils import make_path
+from .utils import make_path, get_tags
 import glob
 import os
 import re
@@ -33,7 +33,7 @@ def index():
     """ Main form
 
     """
-    return render_template("index.html")
+    return render_template("index.html", tags=get_tags())
 
 
 @main_blueprint.route("/output")
@@ -115,7 +115,7 @@ def lemmatize():
         page=request.form.get("pb", "page"),
         category=request.form.get("category", "category"),
         source=request.form.get("source-id"),
-        addition_cats=" ".join(request.form.getlist("tradicategory")),
+        addition_cats=" ".join(request.form.getlist("tradicategory") + request.form.getlist("sourced-tags")),
         words=words
     )
     return Response(
@@ -161,6 +161,15 @@ def passage():
     xml = xsl(xml)
 
     return jsonify({"text": str(xml)})
+
+
+@main_blueprint.route("/api/tags")
+def tags():
+    """ Retrieves a passage
+
+    :return: Dictionary with text key in JSON
+    """
+    return jsonify(get_tags(clear_cache=True))
 
 
 @main_blueprint.errorhandler(ReferenceError)

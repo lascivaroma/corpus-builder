@@ -1,4 +1,8 @@
 # Project specific
+output/*.xsl
+results.txt
+*.xpr
+tags.json
 ./data
 data
 .idea/*
