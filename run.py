@@ -23,18 +23,9 @@ def cli():
     pass
 
 
-@click.command("clear")
-@click.option("--cache", default="cache", help="Path to the cache the resolver")
-def clear(cache="cache"):
-    click.echo("Clearing cache")
-    app, cache = create_app(cache=cache)
-    cache.clear()
-
-
-@click.command("run")
+@cli.command("run")
 @click.option("--debug", is_flag=True, help="Run flask in debug mode")
 @click.option("--data", default="data/*/*", help="Path to the corpora containing directory")
-@click.option("--cache", default="cache", help="Path to the cache the resolver")
 @click.option("--save", "save_folder", default="output", help="Path which will contain the results")
 @click.option("--ip", default="127.0.0.1")
 def run(debug=False, data="data", cache="cache", save_folder="output", ip="127.0.0.1"):
@@ -45,7 +36,7 @@ def run(debug=False, data="data", cache="cache", save_folder="output", ip="127.0
 
 
 @cli.command("search")
-@click.argument("text_id", "text")
+@click.argument("text_id")
 @click.option("--w1", help="Search")
 @click.option("--w2", help="Search", multiple=True)
 @click.option("--depth", help="Search", type=int)
@@ -95,9 +86,6 @@ def search(text_id, w1=None, w2=None, data="data/*/*", depth=1, xsl=None, color=
 def get_tags():
     from app.utils import get_tags
     print(get_tags(clear_cache=True))
-
-cli.add_command(run)
-cli.add_command(clear)
 
 
 if __name__ == "__main__":
