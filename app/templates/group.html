@@ -1,0 +1,167 @@
+{% extends "container.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ url_for('.static', filename='js/typeahead.js')}}"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        /********************************************************************
+         *  Autocomplete for the author
+         */
+        var author_autocomplete = new Bloodhound({
+          "datumTokenizer": function (datum) {
+            return Bloodhound.tokenizers.whitespace(
+                datum.title + " " + datum.author
+            );
+          },
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          identify : function(datum) { return datum.id; },
+          prefetch: {
+            url: "{{ url_for(".authors") }}"
+          }
+        });
+
+        $('#text-typeahead').typeahead(null, {
+          name: 'text-id',
+          source: author_autocomplete,
+          limit: 15,
+          display: function(datum) { return datum.title + " - " + datum.author; }
+        }).bind('typeahead:select', function(ev, suggestion) {
+          $("#text-id").val(suggestion.id);
+        });
+
+
+        $("#fill").on("click", function(event) {
+          event.preventDefault();
+        });
+
+
+        /********************************************************************
+         *  Retrieves the text based on the source identifier
+         */
+
+        $("#search-form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: $("#search-form").attr("action"),
+                type: "GET",
+                data: $("#search-form").serialize()
+            }).done(function(data) {
+                $("#retrieved_content").html(data);
+                $("#retrieved_content form").attr("action", $("#retrieved_content").data("action"));
+            });
+        });
+
+        $("#retrieved_content").on("click", "button[type='reset']", function (e) {
+            e.preventDefault();
+            const parent = $(this).parents(".annotation-container");
+            parent.remove();
+        });
+
+        /********************************************************************
+         *  Save
+         */
+
+        $("#retrieved_content").on("click", "button[type='submit']", function (e) {
+            e.preventDefault();
+            const form = $(this).parents("form");
+            $.ajax({
+                url: "{{ url_for(".save") }}",
+                type: "POST",
+                data: form.serialize()
+            }).done(function(data) {
+                alert("Saved at " + data.path);
+                form.remove();
+            });
+        });
+
+
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+    <!---
+
+        - query
+        - filter
+        - page
+        - analysis
+        - full_analysis
+    -->
+    <form class="form" method="GET" action="{{ url_for('.search') }}" id="search-form">
+      <h2>Search</h2>
+      <div class="form-group row">
+        <label for="pb" class="col-sm-3 col-form-label">Page</label>
+        <div class="col-sm-9">
+          <input type="number" class="form-control" placeholder="Page Beginning" name="page"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="category" class="col-sm-3 col-form-label">Category</label>
+        <div class="col-sm-3">
+          <select multiple class="form-control" id="sourced-tags" name="sourced-tags" style="height: 9em;">{%- for tag in tags %}
+
+                  <option value="#{{ tag }}">{{ tag }}</option>
+
+          {% endfor -%}</select>
+          <textarea class="form-control" id="category" placeholder="Category" name="category" rows="2"></textarea>
+          <label><input type="checkbox" id="composite" name="composite" /> Composite</label>
+        </div>
+        <label for="tradi-category" class="col-sm-3 col-form-label">Base Category</label>
+        <div class="col-sm-3">
+          <select multiple class="form-control" id="tradi-category" name="tradicategory" style="height: 9em;">
+              <option value="#female">Female</option>
+              <option value="#cunnus">Cunnus</option>
+              <option value="#metaphore">Métaphore</option>
+              <option value="#male">Male</option>
+              <option value="#acte">Acte</option>
+              <option value="#loan-word">Emprunt</option>
+              <option value="#fellatio #acte">Fellation</option>
+              <option value="#passive">Passif</option>
+              <option value="#homoeros">Homoérotisme</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="text-typeahead" class="col-sm-3 col-form-label">Text filter</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="text-typeahead" placeholder="Text identifier" name="text-typeahead"/>
+            <div>
+              <input type="text" class="form-control" id="text-id" name="text-filter"/>
+            </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="author" class="col-sm-3 col-form-label">Author filter</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="author" placeholder="Author" name="author"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="title" class="col-sm-3 col-form-label">Title filter</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="title" placeholder="Title" name="title"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="query-id" class="col-sm-3 col-form-label">Query</label>
+        <div class="col-sm-9">
+          <input type="text"
+                 class="form-control" id="query-id" placeholder="CQL Query" name="query"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-12 text-right">
+            <button type="submit" class="btn btn-success btn-small" id="retrieve-id">Search</button>
+        </div>
+      </div>
+    </form>
+
+    <div>
+        <h2>Save</h2>
+        <div id="retrieved_content" data-action="save_individual">
+
+        </div>
+    </div>
+
+{% endblock %}

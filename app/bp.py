@@ -14,10 +14,13 @@ import re
 import zipfile
 import time
 from io import BytesIO
+import requests
 
 
 SPACE_SPLIT = re.compile("((\w+)(\W*))")
 
+with open(os.path.join(os.path.dirname(__file__), "assets", "include.xsl")) as f:
+    XSL = etree.XSLT(etree.parse(f))
 
 main_blueprint = Blueprint(
     "main",
@@ -36,6 +39,130 @@ def index():
     return render_template("index.html", tags=get_tags())
 
 
+@main_blueprint.route("/group")
+def group():
+    """ Main form
+
+    """
+    return render_template("group.html", tags=get_tags())
+
+
+_keys = ("ref", "lemma", "pos", "msd",)
+
+
+def build(hits, keys=_keys, ana="", remove_before_dot=False, remove_after_dot=False):
+    refs, ref_type, data = [], [], []
+    for token in zip(*hits.values()):
+        token = dict(zip(hits.keys(), token))
+        refs.append(token["ref"])
+        ref_type.append(token["in"])
+        data.append(
+            "<w " + ana + " ".join(
+                ["{}=\"{}\"".format(k, token[k]) for k in keys]
+            ) + ">" + token["word"] + "</w>"
+        )
+        if token["lemma"] in {".", "?", "!"}:
+            if remove_before_dot:
+                refs, ref_type, data = [], [], []
+            elif remove_after_dot:
+                break
+    return refs, ref_type, data
+
+
+XML_SCHEME = """
+<div type="fragment" corresp="adams:{page}" ana="{full_analysis}">
+  <bibl><author>{author}</author>, <title>{title}</title>, <biblScope>{ref}</biblScope></bibl>
+  <quote xml:lang="lat" source="{tid}:{ref}" type="{ref_type}">
+    {words}
+  </quote>
+</div>
+"""
+
+
+@main_blueprint.route("/api/search")
+def search():
+    """
+
+    Request params:
+        - query
+        - filter
+        - page
+        - analysis
+        - full_analysis
+        - text-filter
+
+    """
+    corpus = "latin-corpus"
+    server = "http://localhost:8888/blacklab-server/{}-index/hits".format(corpus)
+
+    _filter = []
+    text_filter = request.args.get("text-filter")
+    if text_filter:
+        text_filter = text_filter.replace('.', '\\.').replace('\\.*', '.*').replace("-", "\\-").replace(":", "\\:")
+        _filter.append(f"docId:{text_filter}")
+
+    author = request.args.get("author")
+    if author:
+        _filter.append(f"author:{author}")
+    title = request.args.get("title")
+    if title:
+        _filter.append(f"title:{title}")
+
+
+    category = ["#"+cat.strip("#") for cat in request.args.get("category", "").split()]
+    full_analysis = request.args.getlist("tradicategory") + \
+        request.args.getlist("sourced-tags") + category
+    full_analysis = ["#"+cat.strip("#") for cat in full_analysis]
+
+    req = requests.post(server, data={
+        "patt": request.args.get("query"),
+        "filter": ";".join(_filter) or None,
+        "wordsaroundhit": 30,
+        "usecontent": "fi",  # Slower but better for my purposes
+        "outputformat": "json",
+        "prettyprint": True,
+        "number": 200
+    })
+
+
+    resp = req.json()
+    if "hits" not in resp:
+        return "<h3>Error</h3><pre>{}</pre>".format(str(resp))
+    elif len(resp["hits"]) == 0:
+        return "<em>No results</em>"
+    out = """<results>"""
+
+    for hit in resp["hits"]:
+        data = []
+        refs = []
+        ref_type = []
+        doc = hit["docPid"]
+        title = resp["docInfos"][doc]["title"][0]
+        author = resp["docInfos"][doc]["author"][0]
+        r, t, d = build(hit["left"], remove_before_dot=True)
+        refs.extend(r), ref_type.extend(t), data.extend(d)
+        r, t, d = build(hit["match"], ana=f' ana="{" ".join(full_analysis)}" ')
+        refs.extend(r), ref_type.extend(t), data.extend(d)
+        r, t, d = build(hit["right"], remove_after_dot=True)
+        refs.extend(r), ref_type.extend(t), data.extend(d)
+
+        out += XML_SCHEME.format(
+                words="\n    ".join(data).replace('"""', "'\"'"),
+                tid=resp["docInfos"][doc]["docId"][0],
+                ref="-".join([refs[0], refs[-1]]),
+                ref_type=ref_type[0],
+                page=request.args.get("page", ""),
+                full_analysis=" ".join(full_analysis),
+                author=author,
+                title=title
+            )
+
+    return Response(
+        str(XSL(etree.fromstring(out+"</results>"))),
+        mimetype='text/html'
+    )
+
+
 @main_blueprint.route("/output")
 def current_output():
     """ Render current output
@@ -46,6 +173,24 @@ def current_output():
     for file_id in range(len(files)):
         with open(os.path.join(current_app.save_folder, "{}.xml".format(file_id))) as f:
             done.append(f.read())
+
+    return Response(
+        "\n".join(
+            done + ["</div>"]
+        ),
+        headers={"Content-type": "application/xml"}
+    )
+
+
+@main_blueprint.route("/last")
+def last_output():
+    """ Render current output
+    """
+    done = ["<div>"]
+    files = glob.glob(os.path.join(current_app.save_folder, "*.xml"))
+
+    with open(os.path.join(current_app.save_folder, "{}.xml".format(len(files)-1))) as f:
+        done.append(f.read())
 
     return Response(
         "\n".join(
@@ -176,5 +321,7 @@ def tags():
 
 @main_blueprint.errorhandler(ReferenceError)
 def handle_invalid_usage(error):
-    return Response("Unknown reference", status=404, 
-        headers={"Content-type": "text/plain"})
+    return Response(
+        "Unknown reference", status=404,
+        headers={"Content-type": "text/plain"}
+    )

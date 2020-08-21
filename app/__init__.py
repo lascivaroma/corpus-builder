@@ -1,10 +1,9 @@
 from flask import Flask
 import os
 import glob
-from capitains_nautilus.cts.resolver import NautilusCTSResolver
+from MyCapytain.resolvers.cts.local import CtsCapitainsLocalResolver
 from .bp import main_blueprint
 from .utils import make_path
-from werkzeug.contrib.cache import FileSystemCache
 from pycollatinus import Lemmatiseur
 import pickle
 
@@ -34,10 +33,9 @@ def create_app(resolver=default_resolver, save_folder="output", cache=make_path(
 
     app.lemmatizer = lemmatizer
 
-    app.resolver = NautilusCTSResolver(
-        resource=glob.glob(resolver),
-        cache=FileSystemCache(cache)
+    app.resolver = CtsCapitainsLocalResolver(
+        resource=glob.glob(resolver)
     )
 
     app.register_blueprint(main_blueprint)
-    return app, app.resolver.cache
+    return app, None
