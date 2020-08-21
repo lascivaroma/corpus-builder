@@ -81,7 +81,9 @@
             var v = $('#xml').val();
             var textBefore = v.substring(0,  cursorPos);
             var textAfter  = v.substring(cursorPos, v.length);
-            var addition = " ana=\"#"+ $("#category").val() + " " + $("#sourced-tags").val().join(" ");
+            var tags = "";
+            if ($("#category").val().trim()) { tags = "#" + $("#category").val().trim() + " "; }
+            var addition = " ana=\"" + tags + $("#sourced-tags").val().join(" ");
             if (document.getElementById("composite").checked) {
                 addition += " #composite";
             }

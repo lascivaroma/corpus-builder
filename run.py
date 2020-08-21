@@ -36,10 +36,12 @@ def clear(cache="cache"):
 @click.option("--data", default="data/*/*", help="Path to the corpora containing directory")
 @click.option("--cache", default="cache", help="Path to the cache the resolver")
 @click.option("--save", "save_folder", default="output", help="Path which will contain the results")
-def run(debug=False, data="data", cache="cache", save_folder="output"):
+@click.option("--ip", default="127.0.0.1")
+def run(debug=False, data="data", cache="cache", save_folder="output", ip="127.0.0.1"):
+    # last_page Compute last page here ? so we do not forget ?
     app, cache = create_app(resolver=data, cache=cache, save_folder=save_folder)
     app.debug = debug
-    app.run()
+    app.run(host=ip)
 
 
 @cli.command("search")
