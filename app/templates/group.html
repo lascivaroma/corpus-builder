@@ -48,6 +48,10 @@
             }).done(function(data) {
                 $("#retrieved_content").html(data);
                 $("#retrieved_content form").attr("action", $("#retrieved_content").data("action"));
+                $("#retrieved_content form").each(function(index, el) {
+                  var element = $(el);
+                  element.find("textarea").val(element.find("div.xml").html());
+                });
             });
         });
 
@@ -56,6 +60,53 @@
             const parent = $(this).parents(".annotation-container");
             parent.remove();
         });
+
+        $("#retrieved_content").on("click", "w", function (e) {
+            e.preventDefault();
+            var w = $(e.target),
+                div = w.parents("div[type='fragment']")[0],
+                textarea = w.parents(".annotation-container").find("textarea");
+            w.toggleClass("removed");
+            textarea.val(applyXSL(div));
+        });
+
+        var xslStylesheet;
+        var myDOM;
+        var xmlDoc;
+
+        var xsltProcessor = new XSLTProcessor(),
+            parser = new DOMParser(),
+            serializer = new XMLSerializer();
+        var doc = parser.parseFromString(`<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    exclude-result-prefixes="xs"
+    version="1.0">
+    <xsl:output encoding="UTF-8" method="xml"/>
+    <xsl:template match="w[contains(@class, 'removed')]"/>
+    <xsl:template match="@class"/>
+    <xsl:template match="node()|@*">
+        <xsl:copy>
+            <xsl:apply-templates select="node()|@*"/>
+        </xsl:copy>
+    </xsl:template>
+</xsl:stylesheet>`, "text/xml");
+        xsltProcessor.importStylesheet(doc);
+
+
+        applyXSL = function (element){
+
+
+          var fragment = xsltProcessor.transformToFragment(element, document);
+          return serializer.serializeToString(fragment).replace(/[ ]+\n/g, '').replace('xmlns="http://www.w3.org/1999/xhtml"', '');
+
+          /*document.getElementById("example").innerHTML = "";
+
+          myDOM = fragment;
+          document.getElementById("example").appendChild(fragment);
+          */
+        }
+
 
         /********************************************************************
          *  Save

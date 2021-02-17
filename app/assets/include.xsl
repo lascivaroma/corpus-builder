@@ -23,12 +23,11 @@
                     <button class="btn btn-secondary" type="reset">Reset</button>
                 </div>
                 <div class="col-md-10">
-                   <xsl:apply-templates select="bibl" />
+                    <div class="xml">
+                        <xsl:copy-of select="." />
+                    </div>
                    <div>
-                       <xsl:apply-templates select=".//w" />
-                   </div>
-                   <div>
-                       <textarea style="width:100%; height: 150px;" name="xml"><xsl:copy-of select="." /></textarea>
+                       <textarea style="width:100%; height: 150px;" name="xml"/>
                    </div>
                </div>
             </div>

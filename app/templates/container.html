@@ -14,6 +14,56 @@
                 })
             })
         </script>
+        <style type="text/css">
+          div.xml title {
+            font-style: italic;
+            display: inline;
+          }
+          div.xml author {
+            font-weight: bold;
+          }
+          div.xml bibl, div.xml quote {
+            display:block;
+          }
+          div.xml w[ana] {
+            color:red;
+          }
+          div.xml w.removed {
+            text-decoration: line-through;
+          }
+          div.xml w:hover {
+            color:darkblue;
+            cursor:pointer;
+          }
+          div.xml w {
+            position:relative;
+          }
+          div.xml w:before {
+            content: attr(lemma); /* here's the magic */
+            position:absolute;
+            
+            /* vertically center */
+            top:-100%;
+            transform:translateY(-50%);
+            
+            /* move to right */
+            left:-75%;
+            /*margin-left:15px; /* and add a small left margin */
+            
+            /* basic styles */
+            width:250%;
+            padding:10px;
+            border-radius:10px;
+            background:rgba(0, 0, 0, .7);;
+            color: #fff;
+            text-align:center;
+
+            display:none; /* hide by default */
+          }
+          div.xml w:hover:before {
+            display:block;
+          }
+        </style>
     </head>
     <body>
       <nav class="navbar navbar-expand-md navbar-dark bg-dark justify-content-between" style="margin-bottom: 50px;">
