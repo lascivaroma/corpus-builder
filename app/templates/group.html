@@ -125,6 +125,34 @@
             });
         });
 
+      $("#retrieved_content").on("click", ".remove-selection", function (e) {
+        e.preventDefault();
+        var sel = document.getSelection(),
+            range = sel.getRangeAt(0);
+
+        var start, end;
+        
+        if (range.startContainer.parentElement !== "undefined" && range.startContainer.parentElement.localName === "w") {
+          start = range.startContainer.parentElement;
+        } else if (range.startContainer.previousElementSibling !== "undefined" && range.startContainer.previousElementSibling.localName === "w") {
+          start = range.startContainer.previousElementSibling;
+        }
+        
+        if (range.endContainer.parentElement !== "undefined" && range.endContainer.parentElement.localName === "w") {
+          end = range.endContainer.parentElement;
+        } else if (range.endContainer.previousElementSibling !== "undefined" && range.endContainer.previousElementSibling.localName === "w") {
+          end = range.endContainer.previousElementSibling;
+        }
+
+        $(start).nextUntil($(end).next("w")).addBack().toggleClass("removed");
+
+        /* Update Text Area */
+        var annotation_container = $(start).parents(".annotation-container"),
+            div = annotation_container.find("div[type='fragment']")[0],
+            textarea = annotation_container.find("textarea");
+
+        textarea.val(applyXSL(div));
+      });
 
     });
 </script>
@@ -145,6 +173,12 @@
         <label for="pb" class="col-sm-3 col-form-label">Page</label>
         <div class="col-sm-9">
           <input type="number" class="form-control" placeholder="Page Beginning" name="page"/>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="pb" class="col-sm-3 col-form-label">TLL</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" placeholder="TLL" name="TLL"/>
         </div>
       </div>
       <div class="form-group row">

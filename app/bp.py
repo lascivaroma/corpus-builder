@@ -71,7 +71,7 @@ def build(hits, keys=_keys, ana="", remove_before_dot=False, remove_after_dot=Fa
 
 XML_SCHEME = """
 <div type="fragment" corresp="adams:{page}" ana="{full_analysis}">
-  <bibl><author>{author}</author>, <title>{title}</title>, <biblScope>{ref}</biblScope></bibl>
+  <bibl ref="#adams"><author>{author}</author>, <title>{title}</title>, <biblScope>{ref}</biblScope></bibl>{TLL}
   <quote xml:lang="lat" source="{tid}:{ref}" type="{ref_type}">
     {words}
   </quote>
@@ -104,10 +104,10 @@ def search():
     author = request.args.get("author")
     if author:
         _filter.append(f"author:{author}")
+
     title = request.args.get("title")
     if title:
         _filter.append(f"title:{title}")
-
 
     category = ["#"+cat.strip("#") for cat in request.args.get("category", "").split()]
     full_analysis = request.args.getlist("tradicategory") + \
@@ -116,7 +116,7 @@ def search():
 
     req = requests.post(server, data={
         "patt": request.args.get("query"),
-        "filter": ";".join(_filter) or None,
+        "filter": " AND ".join(_filter) or None,
         "wordsaroundhit": 30,
         "usecontent": "fi",  # Slower but better for my purposes
         "outputformat": "json",
@@ -126,6 +126,7 @@ def search():
 
 
     resp = req.json()
+
     if "hits" not in resp:
         return "<h3>Error</h3><pre>{}</pre>".format(str(resp))
     elif len(resp["hits"]) == 0:
@@ -154,7 +155,8 @@ def search():
                 page=request.args.get("page", ""),
                 full_analysis=" ".join(full_analysis),
                 author=author,
-                title=title
+                title=title,
+                TLL=f"\n  <bibl ref='#TLL'><title>TLL</title>, <biblScope>{request.args.get('TLL', '').strip()}</biblScope></bibl>" if request.args.get("TLL") else ""
             )
 
     return Response(

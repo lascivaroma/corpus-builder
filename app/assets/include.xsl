@@ -21,6 +21,8 @@
                     <button class="btn btn-primary" type="submit">Save</button>
                     <br /><br/>
                     <button class="btn btn-secondary" type="reset">Reset</button>
+                    <br /><br/>
+                    <button class="btn btn-warning remove-selection">Remove</button>
                 </div>
                 <div class="col-md-10">
                     <div class="xml">
@@ -59,8 +61,6 @@
         <b><xsl:apply-templates /></b>
     </xsl:template>
 
-    <xsl:template match="biblScope">
-        <xsl:apply-templates />
-    </xsl:template>
+    <xsl:template match="biblScope"><xsl:apply-templates /></xsl:template>
 
 </xsl:stylesheet>
